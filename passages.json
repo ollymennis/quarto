@@ -1,0 +1,148 @@
+{
+  "meta": {
+    "name": "Shakespeare's Complete Works",
+    "description": "Key passages from Shakespeare's plays and sonnets, clustered by semantic similarity",
+    "model": "embed-v4.0"
+  },
+  "categories": [
+    { "id": "love", "name": "Love & Desire", "color": "#FF5D98" },
+    { "id": "tragedy", "name": "Tragedy & Death", "color": "#003B62" },
+    { "id": "ambition", "name": "Ambition & Power", "color": "#BF3900" },
+    { "id": "wisdom", "name": "Wisdom & Reflection", "color": "#ABAC80" },
+    { "id": "comedy", "name": "Comedy & Wit", "color": "#C5BA00" },
+    { "id": "madness", "name": "Madness & Despair", "color": "#74A2C4" },
+    { "id": "magic", "name": "Magic & Wonder", "color": "#F7AE80" }
+  ],
+  "passages": [
+    { "text": "Shall I compare thee to a summer's day? Thou art more lovely and more temperate. Rough winds do shake the darling buds of May, and summer's lease hath all too short a date.", "source": "Sonnet 18", "category": "love" },
+    { "text": "Let me not to the marriage of true minds admit impediments. Love is not love which alters when it alteration finds, or bends with the remover to remove.", "source": "Sonnet 116", "category": "love" },
+    { "text": "My bounty is as boundless as the sea, my love as deep; the more I give to thee, the more I have, for both are infinite.", "source": "Romeo and Juliet, Act 2 Scene 2", "category": "love" },
+    { "text": "But soft, what light through yonder window breaks? It is the east, and Juliet is the sun. Arise, fair sun, and kill the envious moon.", "source": "Romeo and Juliet, Act 2 Scene 2", "category": "love" },
+    { "text": "If music be the food of love, play on, give me excess of it; that surfeiting, the appetite may sicken, and so die.", "source": "Twelfth Night, Act 1 Scene 1", "category": "love" },
+    { "text": "Hear my soul speak. Of the very instant that I saw you, did my heart fly at your service.", "source": "The Tempest, Act 3 Scene 1", "category": "love" },
+    { "text": "Love looks not with the eyes, but with the mind, and therefore is winged Cupid painted blind.", "source": "A Midsummer Night's Dream, Act 1 Scene 1", "category": "love" },
+    { "text": "Who ever loved that loved not at first sight?", "source": "As You Like It, Act 3 Scene 5", "category": "love" },
+    { "text": "The course of true love never did run smooth.", "source": "A Midsummer Night's Dream, Act 1 Scene 1", "category": "love" },
+    { "text": "She loved me for the dangers I had passed, and I loved her that she did pity them.", "source": "Othello, Act 1 Scene 3", "category": "love" },
+
+    { "text": "To be, or not to be, that is the question — whether 'tis nobler in the mind to suffer the slings and arrows of outrageous fortune, or to take arms against a sea of troubles.", "source": "Hamlet, Act 3 Scene 1", "category": "tragedy" },
+    { "text": "Tomorrow, and tomorrow, and tomorrow, creeps in this petty pace from day to day, to the last syllable of recorded time; and all our yesterdays have lighted fools the way to dusty death.", "source": "Macbeth, Act 5 Scene 5", "category": "tragedy" },
+    { "text": "Good night, good night! Parting is such sweet sorrow, that I shall say good night till it be morrow.", "source": "Romeo and Juliet, Act 2 Scene 2", "category": "tragedy" },
+    { "text": "A plague o' both your houses! They have made worms' meat of me.", "source": "Romeo and Juliet, Act 3 Scene 1", "category": "tragedy" },
+    { "text": "Howl, howl, howl, howl! O, you are men of stones. Had I your tongues and eyes, I'd use them so that heaven's vault should crack. She's gone forever.", "source": "King Lear, Act 5 Scene 3", "category": "tragedy" },
+    { "text": "The rest is silence.", "source": "Hamlet, Act 5 Scene 2", "category": "tragedy" },
+    { "text": "O, I am slain! If thou be merciful, open the tomb, lay me with Juliet.", "source": "Romeo and Juliet, Act 5 Scene 3", "category": "tragedy" },
+    { "text": "Now cracks a noble heart. Good night, sweet prince, and flights of angels sing thee to thy rest.", "source": "Hamlet, Act 5 Scene 2", "category": "tragedy" },
+    { "text": "Out, out, brief candle! Life's but a walking shadow, a poor player that struts and frets his hour upon the stage, and then is heard no more.", "source": "Macbeth, Act 5 Scene 5", "category": "tragedy" },
+
+    { "text": "Is this a dagger which I see before me, the handle toward my hand? Come, let me clutch thee. I have thee not, and yet I see thee still.", "source": "Macbeth, Act 2 Scene 1", "category": "ambition" },
+    { "text": "Friends, Romans, countrymen, lend me your ears; I come to bury Caesar, not to praise him. The evil that men do lives after them; the good is oft interred with their bones.", "source": "Julius Caesar, Act 3 Scene 2", "category": "ambition" },
+    { "text": "Once more unto the breach, dear friends, once more, or close the wall up with our English dead! In peace there's nothing so becomes a man as modest stillness and humility.", "source": "Henry V, Act 3 Scene 1", "category": "ambition" },
+    { "text": "Now is the winter of our discontent made glorious summer by this sun of York.", "source": "Richard III, Act 1 Scene 1", "category": "ambition" },
+    { "text": "Uneasy lies the head that wears a crown.", "source": "Henry IV Part 2, Act 3 Scene 1", "category": "ambition" },
+    { "text": "Et tu, Brute? Then fall, Caesar.", "source": "Julius Caesar, Act 3 Scene 1", "category": "ambition" },
+    { "text": "Cowards die many times before their deaths; the valiant never taste of death but once.", "source": "Julius Caesar, Act 2 Scene 2", "category": "ambition" },
+    { "text": "Cry havoc and let slip the dogs of war!", "source": "Julius Caesar, Act 3 Scene 1", "category": "ambition" },
+    { "text": "I am not what I am.", "source": "Othello, Act 1 Scene 1", "category": "ambition" },
+    { "text": "By the pricking of my thumbs, something wicked this way comes. Open, locks, whoever knocks!", "source": "Macbeth, Act 4 Scene 1", "category": "ambition" },
+
+    { "text": "All the world's a stage, and all the men and women merely players. They have their exits and their entrances, and one man in his time plays many parts.", "source": "As You Like It, Act 2 Scene 7", "category": "wisdom" },
+    { "text": "This above all: to thine own self be true, and it must follow, as the night the day, thou canst not then be false to any man.", "source": "Hamlet, Act 1 Scene 3", "category": "wisdom" },
+    { "text": "There is nothing either good or bad, but thinking makes it so.", "source": "Hamlet, Act 2 Scene 2", "category": "wisdom" },
+    { "text": "The fault, dear Brutus, is not in our stars, but in ourselves, that we are underlings.", "source": "Julius Caesar, Act 1 Scene 2", "category": "wisdom" },
+    { "text": "Brevity is the soul of wit.", "source": "Hamlet, Act 2 Scene 2", "category": "wisdom" },
+    { "text": "What's in a name? That which we call a rose by any other name would smell as sweet.", "source": "Romeo and Juliet, Act 2 Scene 2", "category": "wisdom" },
+    { "text": "We know what we are, but know not what we may be.", "source": "Hamlet, Act 4 Scene 5", "category": "wisdom" },
+    { "text": "There are more things in heaven and earth, Horatio, than are dreamt of in your philosophy.", "source": "Hamlet, Act 1 Scene 5", "category": "wisdom" },
+    { "text": "How poor are they that have not patience! What wound did ever heal but by degrees?", "source": "Othello, Act 2 Scene 3", "category": "wisdom" },
+    { "text": "The lady doth protest too much, methinks.", "source": "Hamlet, Act 3 Scene 2", "category": "wisdom" },
+
+    { "text": "Lord, what fools these mortals be!", "source": "A Midsummer Night's Dream, Act 3 Scene 2", "category": "comedy" },
+    { "text": "Some are born great, some achieve greatness, and some have greatness thrust upon 'em.", "source": "Twelfth Night, Act 2 Scene 5", "category": "comedy" },
+    { "text": "I do love nothing in the world so well as you — is not that strange?", "source": "Much Ado About Nothing, Act 4 Scene 1", "category": "comedy" },
+    { "text": "If we shadows have offended, think but this, and all is mended — that you have but slumbered here while these visions did appear.", "source": "A Midsummer Night's Dream, Act 5 Scene 1", "category": "comedy" },
+    { "text": "Though she be but little, she is fierce.", "source": "A Midsummer Night's Dream, Act 3 Scene 2", "category": "comedy" },
+    { "text": "I would my horse had the speed of your tongue, and so good a continuer. But keep your way, i' God's name; I have done.", "source": "Much Ado About Nothing, Act 1 Scene 1", "category": "comedy" },
+    { "text": "Better a witty fool than a foolish wit.", "source": "Twelfth Night, Act 1 Scene 5", "category": "comedy" },
+    { "text": "The fool doth think he is wise, but the wise man knows himself to be a fool.", "source": "As You Like It, Act 5 Scene 1", "category": "comedy" },
+
+    { "text": "O, beware, my lord, of jealousy! It is the green-eyed monster, which doth mock the meat it feeds on.", "source": "Othello, Act 3 Scene 3", "category": "madness" },
+    { "text": "Out, damned spot! Out, I say! One, two — why then, 'tis time to do't. Hell is murky.", "source": "Macbeth, Act 5 Scene 1", "category": "madness" },
+    { "text": "Though this be madness, yet there is method in't.", "source": "Hamlet, Act 2 Scene 2", "category": "madness" },
+    { "text": "Blow, winds, and crack your cheeks! Rage, blow, you cataracts and hurricanoes!", "source": "King Lear, Act 3 Scene 2", "category": "madness" },
+    { "text": "I am one, sir, that comes to tell you your daughter and the Moor are now making the beast with two backs.", "source": "Othello, Act 1 Scene 1", "category": "madness" },
+    { "text": "Put out the light, and then put out the light. If I quench thee, thou flaming minister, I can again thy former light restore.", "source": "Othello, Act 5 Scene 2", "category": "madness" },
+    { "text": "O, what a rogue and peasant slave am I! Is it not monstrous that this player here, but in a fiction, in a dream of passion, could force his soul so to his own conceit.", "source": "Hamlet, Act 2 Scene 2", "category": "madness" },
+    { "text": "I have of late — but wherefore I know not — lost all my mirth, forgone all custom of exercises.", "source": "Hamlet, Act 2 Scene 2", "category": "madness" },
+    { "text": "Double, double toil and trouble; fire burn, and cauldron bubble.", "source": "Macbeth, Act 4 Scene 1", "category": "madness" },
+
+    { "text": "We are such stuff as dreams are made on, and our little life is rounded with a sleep.", "source": "The Tempest, Act 4 Scene 1", "category": "magic" },
+    { "text": "O brave new world, that has such people in't!", "source": "The Tempest, Act 5 Scene 1", "category": "magic" },
+    { "text": "Full fathom five thy father lies; of his bones are coral made; those are pearls that were his eyes; nothing of him that doth fade.", "source": "The Tempest, Act 1 Scene 2", "category": "magic" },
+    { "text": "I'll met by moonlight, proud Titania.", "source": "A Midsummer Night's Dream, Act 2 Scene 1", "category": "magic" },
+    { "text": "Now my charms are all o'erthrown, and what strength I have's mine own, which is most faint.", "source": "The Tempest, Epilogue", "category": "magic" },
+    { "text": "I know a bank where the wild thyme blows, where oxlips and the nodding violet grows, quite over-canopied with luscious woodbine.", "source": "A Midsummer Night's Dream, Act 2 Scene 1", "category": "magic" },
+    { "text": "The earth has music for those who listen. And this our life, exempt from public haunt, finds tongues in trees, books in the running brooks, sermons in stones, and good in everything.", "source": "As You Like It, Act 2 Scene 1", "category": "magic" },
+    { "text": "Be not afeard; the isle is full of noises, sounds, and sweet airs, that give delight and hurt not.", "source": "The Tempest, Act 3 Scene 2", "category": "magic" },
+
+    { "text": "The quality of mercy is not strained; it droppeth as the gentle rain from heaven upon the place beneath. It is twice blest: it blesseth him that gives and him that takes.", "source": "The Merchant of Venice, Act 4 Scene 1", "category": "wisdom" },
+    { "text": "If you prick us, do we not bleed? If you tickle us, do we not laugh? If you poison us, do we not die? And if you wrong us, shall we not revenge?", "source": "The Merchant of Venice, Act 3 Scene 1", "category": "tragedy" },
+    { "text": "All that glisters is not gold; often have you heard that told. Many a man his life hath sold but my outside to behold.", "source": "The Merchant of Venice, Act 2 Scene 7", "category": "wisdom" },
+    { "text": "The devil can cite Scripture for his purpose. An evil soul producing holy witness is like a villain with a smiling cheek.", "source": "The Merchant of Venice, Act 1 Scene 3", "category": "wisdom" },
+    { "text": "In sooth, I know not why I am so sad. It wearies me; you say it wearies you; but how I caught it, found it, or came by it, what stuff 'tis made of, whereof it is born, I am to learn.", "source": "The Merchant of Venice, Act 1 Scene 1", "category": "madness" },
+
+    { "text": "Age cannot wither her, nor custom stale her infinite variety. Other women cloy the appetites they feed, but she makes hungry where most she satisfies.", "source": "Antony and Cleopatra, Act 2 Scene 2", "category": "love" },
+    { "text": "I am dying, Egypt, dying; only I here importune death awhile, until of many thousand kisses the poor last I lay upon thy lips.", "source": "Antony and Cleopatra, Act 4 Scene 15", "category": "tragedy" },
+    { "text": "Give me my robe, put on my crown; I have immortal longings in me.", "source": "Antony and Cleopatra, Act 5 Scene 2", "category": "ambition" },
+    { "text": "Let Rome in Tiber melt, and the wide arch of the ranged empire fall! Here is my space. Kingdoms are clay.", "source": "Antony and Cleopatra, Act 1 Scene 1", "category": "love" },
+
+    { "text": "Come, you spirits that tend on mortal thoughts, unsex me here, and fill me from the crown to the toe top-full of direst cruelty!", "source": "Macbeth, Act 1 Scene 5", "category": "ambition" },
+    { "text": "Will all great Neptune's ocean wash this blood clean from my hand? No, this my hand will rather the multitudinous seas incarnadine, making the green one red.", "source": "Macbeth, Act 2 Scene 2", "category": "madness" },
+
+    { "text": "I pray you, do not fall in love with me, for I am falser than vows made in wine.", "source": "As You Like It, Act 3 Scene 5", "category": "comedy" },
+    { "text": "Men have died from time to time, and worms have eaten them, but not for love.", "source": "As You Like It, Act 4 Scene 1", "category": "comedy" },
+
+    { "text": "It is a tale told by an idiot, full of sound and fury, signifying nothing.", "source": "Macbeth, Act 5 Scene 5", "category": "madness" },
+
+    { "text": "When I was at home, I was in a better place: but travellers must be content.", "source": "As You Like It, Act 2 Scene 4", "category": "wisdom" },
+
+    { "text": "I wasted time, and now doth time waste me.", "source": "Richard II, Act 5 Scene 5", "category": "tragedy" },
+    { "text": "This royal throne of kings, this sceptred isle, this earth of majesty, this seat of Mars, this other Eden, demi-paradise.", "source": "Richard II, Act 2 Scene 1", "category": "ambition" },
+    { "text": "For God's sake, let us sit upon the ground and tell sad stories of the death of kings.", "source": "Richard II, Act 3 Scene 2", "category": "tragedy" },
+
+    { "text": "I must be cruel, only to be kind: thus bad begins and worse remains behind.", "source": "Hamlet, Act 3 Scene 4", "category": "wisdom" },
+
+    { "text": "It is not in the stars to hold our destiny but in ourselves.", "source": "Julius Caesar, Act 1 Scene 2", "category": "wisdom" },
+
+    { "text": "Exit, pursued by a bear.", "source": "The Winter's Tale, Act 3 Scene 3", "category": "comedy" },
+    { "text": "A sad tale's best for winter. I have one of sprites and goblins.", "source": "The Winter's Tale, Act 2 Scene 1", "category": "magic" },
+    { "text": "It is required you do awake your faith. Music, awake her; strike! 'Tis time; descend; be stone no more.", "source": "The Winter's Tale, Act 5 Scene 3", "category": "magic" },
+
+    { "text": "Some rise by sin, and some by virtue fall.", "source": "Measure for Measure, Act 2 Scene 1", "category": "wisdom" },
+    { "text": "The tempter or the tempted, who sins most? Not she, nor doth she tempt; but it is I that, lying by the violet in the sun, do as the carrion does, not as the flower, corrupt with virtuous season.", "source": "Measure for Measure, Act 2 Scene 2", "category": "madness" },
+    { "text": "O, it is excellent to have a giant's strength; but it is tyrannous to use it like a giant.", "source": "Measure for Measure, Act 2 Scene 2", "category": "wisdom" },
+
+    { "text": "There is a world elsewhere.", "source": "Coriolanus, Act 3 Scene 3", "category": "ambition" },
+    { "text": "O, a kiss, long as my exile, sweet as my revenge!", "source": "Coriolanus, Act 5 Scene 3", "category": "love" },
+    { "text": "What is the city but the people? True, the people are the city.", "source": "Coriolanus, Act 3 Scene 1", "category": "wisdom" },
+
+    { "text": "I am a Jew. Hath not a Jew eyes? Hath not a Jew hands, organs, dimensions, senses, affections, passions?", "source": "The Merchant of Venice, Act 3 Scene 1", "category": "tragedy" },
+
+    { "text": "When he shall die, take him and cut him out in little stars, and he will make the face of heaven so fine that all the world will be in love with night.", "source": "Romeo and Juliet, Act 3 Scene 2", "category": "love" },
+
+    { "text": "O, she doth teach the torches to burn bright! It seems she hangs upon the cheek of night like a rich jewel in an Ethiope's ear.", "source": "Romeo and Juliet, Act 1 Scene 5", "category": "love" },
+
+    { "text": "When I do count the clock that tells the time, and see the brave day sunk in hideous night; when I behold the violet past prime, and sable curls all silvered o'er with white.", "source": "Sonnet 12", "category": "wisdom" },
+    { "text": "When, in disgrace with fortune and men's eyes, I all alone beweep my outcast state, and trouble deaf heaven with my bootless cries, and look upon myself and curse my fate.", "source": "Sonnet 29", "category": "madness" },
+    { "text": "That time of year thou mayst in me behold when yellow leaves, or none, or few, do hang upon those boughs which shake against the cold, bare ruined choirs, where late the sweet birds sang.", "source": "Sonnet 73", "category": "tragedy" },
+    { "text": "My mistress' eyes are nothing like the sun; coral is far more red than her lips' red; if snow be white, why then her breasts are dun; if hairs be wires, black wires grow on her head.", "source": "Sonnet 130", "category": "comedy" },
+    { "text": "So long as men can breathe or eyes can see, so long lives this, and this gives life to thee.", "source": "Sonnet 18", "category": "love" },
+    { "text": "Being your slave, what should I do but tend upon the hours and times of your desire? I have no precious time at all to spend, nor services to do, till you require.", "source": "Sonnet 57", "category": "love" },
+
+    { "text": "O, what a tangled web we weave, when first we practise to deceive! But trust me, gentlemen, I'll prove more true than those that have more cunning to be strange.", "source": "The Merry Wives of Windsor, Act 2 Scene 2", "category": "comedy" },
+    { "text": "Why, then the world's mine oyster, which I with sword will open.", "source": "The Merry Wives of Windsor, Act 2 Scene 2", "category": "comedy" },
+
+    { "text": "Tis not enough to help the feeble up, but to support him after.", "source": "Timon of Athens, Act 1 Scene 1", "category": "wisdom" },
+    { "text": "I am Misanthropos, and hate mankind. For thy part, I do wish thou wert a dog, that I might love thee something.", "source": "Timon of Athens, Act 4 Scene 3", "category": "madness" }
+  ]
+}

@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  @font-face {
+    font-family: 'iA Quattro';
+    src: url('fonts/iAWriterQuattroS-Regular.woff2') format('woff2');
+    font-weight: 400;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { overflow: hidden; background: #f4ede4; width: 100%; height: 100%; }
+  canvas { display: block; }
+  #texture-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 1; mix-blend-mode: multiply; opacity: 0.06;
+  }
+  #vignette {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 2;
+    background: radial-gradient(ellipse at center, transparent 30%, rgba(210,200,185,0.5) 100%);
+  }
+  #overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #f4ede4; z-index: 100; pointer-events: none;
+    transition: opacity 2s ease; opacity: 1;
+  }
+  #overlay.fade { opacity: 0; }
+  .cursor-ring {
+    position: fixed; width: 32px; height: 32px; border: 1px solid rgba(80,60,50,0.25);
+    border-radius: 50%; pointer-events: none; z-index: 50;
+    transform: translate(-50%, -50%); transition: width 0.3s, height 0.3s, border-color 0.3s;
+  }
+  .cursor-ring.active { width: 48px; height: 48px; border-color: rgba(80,60,50,0.45); }
+  .cursor-dot {
+    position: fixed; width: 4px; height: 4px; background: rgba(80,60,50,0.5);
+    border-radius: 50%; pointer-events: none; z-index: 50;
+    transform: translate(-50%, -50%);
+  }
+  #query-input {
+    position: fixed; bottom: 60px; left: 60px; z-index: 60;
+    width: 340px; padding: 8px 0;
+    background: transparent; border: none; border-bottom: 1px solid rgba(80,60,50,0.2);
+    border-radius: 0; color: rgba(60,45,35,0.85); font-family: 'iA Quattro', monospace;
+    font-weight: 400; font-size: 22px; outline: none; letter-spacing: 1.5px;
+    transition: border-color 0.4s;
+    resize: none; overflow: hidden; line-height: 1.4;
+    height: auto; min-height: 1.4em; max-height: 50vh;
+  }
+  #query-input::placeholder { color: rgba(80,60,50,0.2); }
+  #query-input:focus { border-bottom-color: rgba(80,60,50,0.4); }
+  #query-input.loading { border-bottom-color: rgba(80,60,50,0.4); animation: pulse-border 1s ease infinite; }
+  @keyframes pulse-border { 50% { border-bottom-color: rgba(80,60,50,0.12); } }
+  .passage-label {
+    position: fixed; pointer-events: none; z-index: 55;
+    font-family: 'iA Quattro', monospace; font-weight: 400; font-size: 14px;
+    color: rgba(60,45,35,0.6); letter-spacing: 0.5px;
+    line-height: 1.4;
+    white-space: nowrap;
+    display: none;
+  }
+  .passage-label.visible {
+    display: block;
+  }
+  .passage-label .source {
+    display: block; font-size: 11px; color: rgba(80,60,50,0.4);
+    letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px;
+  }
+  .passage-label.highlight {
+    color: rgba(40,25,15,0.9); z-index: 56;
+    max-width: 340px; white-space: normal;
+    text-transform: uppercase; letter-spacing: 1.5px; font-size: 11px;
+  }
+  .passage-label.dim { color: rgba(80,60,50,0.1); }
+  #results-panel {
+    position: fixed; top: 60px; left: 60px; z-index: 60;
+    display: flex; flex-direction: column; gap: 28px;
+    max-height: calc(100vh - 140px); overflow-y: auto;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+  #results-panel.visible { opacity: 1; }
+  .result-row {
+    display: flex; align-items: flex-start; gap: 12px;
+    font-family: 'iA Quattro', monospace; font-weight: 400;
+    opacity: 0; transform: translateX(-10px);
+    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+  }
+  .result-row:hover { opacity: 0.7; }
+  .result-row.visible { opacity: 1; transform: translateX(0); }
+  .result-row.visible:hover { opacity: 0.8; }
+  .result-score {
+    font-size: 15px; color: rgba(60,45,35,1); min-width: 52px;
+    text-align: right; font-variant-numeric: tabular-nums; flex-shrink: 0;
+    line-height: 1.5;
+  }
+  .result-text {
+    font-size: 15px; color: rgba(60,45,35,1); line-height: 1.5;
+    max-width: 320px;
+  }
+  .result-source {
+    font-size: 11px; color: rgba(80,60,50,1); letter-spacing: 1px;
+    text-transform: uppercase; margin-top: 2px;
+  }
+  .result-dot {
+    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+    margin-top: 9px;
+  }
+  #api-prompt {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    z-index: 200; display: flex; flex-direction: column; gap: 12px; align-items: center;
+  }
+  #api-prompt input {
+    width: 380px; padding: 14px 20px;
+    background: rgba(244, 237, 228, 0.9); border: 1px solid rgba(80,60,50,0.2);
+    border-radius: 6px; color: rgba(60,45,35,0.85); font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 13px; outline: none; letter-spacing: 0.5px; backdrop-filter: blur(16px);
+  }
+  #api-prompt input::placeholder { color: rgba(80,60,50,0.25); }
+  #api-prompt .hint {
+    font-family: 'SF Mono', 'Fira Code', monospace; font-size: 10px;
+    color: rgba(80,60,50,0.3); letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+<div id="overlay"></div>
+<canvas id="texture-overlay"></canvas>
+<div id="vignette"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+<div id="results-panel"></div>
+<textarea id="query-input" placeholder="&#x2588;" autocomplete="off" spellcheck="false" rows="1"></textarea>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+// ─── COHERE API ──────────────────────────────────────────
+const DEFAULT_KEY = 'xX7Rod7Irj7WbAXd6aDDXCwXjUlt8bCHjAsNE1Sq';
+let COHERE_KEY = localStorage.getItem('cohere_key') || DEFAULT_KEY;
+
+const embeddingCache = new Map();
+
+async function getEmbedding(text) {
+  const key = text.toLowerCase().trim();
+  if (embeddingCache.has(key)) {
+    console.log(`⚡ Cache hit for "${text}" — skipping API call`);
+    return embeddingCache.get(key);
+  }
+
+  console.log(`🔗 Calling Cohere embed-v4.0 for "${text}"...`);
+  const t0 = performance.now();
+
+  const res = await fetch('https://api.cohere.com/v2/embed', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${COHERE_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'embed-v4.0',
+      texts: [text],
+      input_type: 'search_query',
+      embedding_types: ['float'],
+    }),
+  });
+  if (!res.ok) throw new Error(`Cohere API error: ${res.status}`);
+  const data = await res.json();
+  const embedding = data.embeddings.float[0];
+
+  const ms = (performance.now() - t0).toFixed(0);
+  console.log(`✓ Got ${embedding.length}D embedding in ${ms}ms`);
+
+  embeddingCache.set(key, embedding);
+  return embedding;
+}
+
+function cosineSimilarity(a, b) {
+  let dot = 0, magA = 0, magB = 0;
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i]; magA += a[i] * a[i]; magB += b[i] * b[i];
+  }
+  return dot / (Math.sqrt(magA) * Math.sqrt(magB) + 1e-8);
+}
+
+// ─── PCA: project high-dim embeddings to 3D ─────────────
+function computePCA(embeddings, dims = 3) {
+  const n = embeddings.length;
+  const d = embeddings[0].length;
+
+  // Compute mean
+  const mean = new Float64Array(d);
+  for (const emb of embeddings) for (let i = 0; i < d; i++) mean[i] += emb[i];
+  for (let i = 0; i < d; i++) mean[i] /= n;
+
+  // Center the data
+  const centered = embeddings.map(emb => {
+    const c = new Float64Array(d);
+    for (let i = 0; i < d; i++) c[i] = emb[i] - mean[i];
+    return c;
+  });
+
+  // Gram matrix K = X * X^T (n x n)
+  const K = [];
+  for (let i = 0; i < n; i++) {
+    K[i] = new Float64Array(n);
+    for (let j = 0; j <= i; j++) {
+      let dot = 0;
+      for (let k = 0; k < d; k++) dot += centered[i][k] * centered[j][k];
+      K[i][j] = dot;
+      K[j][i] = dot;
+    }
+  }
+
+  // Power iteration to find top eigenvectors
+  const eigenvectors = [];
+  const eigenvalues = [];
+  const KWork = K.map(row => Float64Array.from(row));
+
+  for (let ev = 0; ev < dims; ev++) {
+    let v = new Float64Array(n);
+    for (let i = 0; i < n; i++) v[i] = Math.random() - 0.5;
+
+    for (let iter = 0; iter < 200; iter++) {
+      const Kv = new Float64Array(n);
+      for (let i = 0; i < n; i++)
+        for (let j = 0; j < n; j++) Kv[i] += KWork[i][j] * v[j];
+
+      let norm = 0;
+      for (let i = 0; i < n; i++) norm += Kv[i] * Kv[i];
+      norm = Math.sqrt(norm);
+      for (let i = 0; i < n; i++) v[i] = Kv[i] / norm;
+    }
+
+    // Eigenvalue
+    let Kv = new Float64Array(n);
+    for (let i = 0; i < n; i++)
+      for (let j = 0; j < n; j++) Kv[i] += KWork[i][j] * v[j];
+    let lambda = 0;
+    for (let i = 0; i < n; i++) lambda += v[i] * Kv[i];
+
+    eigenvectors.push(v);
+    eigenvalues.push(lambda);
+
+    // Deflate
+    for (let i = 0; i < n; i++)
+      for (let j = 0; j < n; j++)
+        KWork[i][j] -= lambda * v[i] * v[j];
+  }
+
+  // Compute projection basis: u_k = X^T * v_k / sqrt(lambda_k)
+  const basis = [];
+  for (let k = 0; k < dims; k++) {
+    const u = new Float64Array(d);
+    const sqrtLam = Math.sqrt(Math.abs(eigenvalues[k]) + 1e-10);
+    for (let i = 0; i < n; i++) {
+      const w = eigenvectors[k][i] / sqrtLam;
+      for (let j = 0; j < d; j++) u[j] += w * centered[i][j];
+    }
+    basis.push(u);
+  }
+
+  // Project all points
+  const positions = embeddings.map(emb => {
+    const coords = [];
+    for (let k = 0; k < dims; k++) {
+      let val = 0;
+      for (let i = 0; i < d; i++) val += (emb[i] - mean[i]) * basis[k][i];
+      coords.push(val);
+    }
+    return coords;
+  });
+
+  return { positions, mean, basis };
+}
+
+function projectPoint(embedding, pcaResult) {
+  const d = embedding.length;
+  const coords = [];
+  for (let k = 0; k < pcaResult.basis.length; k++) {
+    let val = 0;
+    for (let i = 0; i < d; i++) val += (embedding[i] - pcaResult.mean[i]) * pcaResult.basis[k][i];
+    coords.push(val);
+  }
+  return coords;
+}
+
+// ─── SETUP ───────────────────────────────────────────────
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xf4ede4);
+
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 500);
+camera.position.set(0, 1.5, 10);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.03;
+controls.rotateSpeed = 0.4;
+controls.zoomSpeed = 0.6;
+controls.minDistance = 2;
+controls.maxDistance = 120;
+controls.autoRotate = false;
+controls.enablePan = true;
+controls.panSpeed = 0.3;
+
+// ─── POST-PROCESSING ────────────────────────────────────
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+
+const bloom = new UnrealBloomPass(
+  new THREE.Vector2(window.innerWidth, window.innerHeight),
+  0.25, 0.8, 0.6
+);
+composer.addPass(bloom);
+
+// Static paper texture (rendered once, composited via CSS)
+{
+  const texCanvas = document.getElementById('texture-overlay');
+  texCanvas.width = window.innerWidth;
+  texCanvas.height = window.innerHeight;
+  const ctx = texCanvas.getContext('2d');
+  const imgData = ctx.createImageData(texCanvas.width, texCanvas.height);
+  const d = imgData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const v = Math.random() * 255;
+    d[i] = d[i+1] = d[i+2] = v;
+    d[i+3] = 255;
+  }
+  ctx.putImageData(imgData, 0, 0);
+}
+
+// ─── SOFT BLOB TEXTURE ──────────────────────────────────
+function createBlobTexture() {
+  const size = 128, canvas = document.createElement('canvas');
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+  grad.addColorStop(0, 'rgba(255,255,255,1)');
+  grad.addColorStop(0.25, 'rgba(255,255,255,0.85)');
+  grad.addColorStop(0.5, 'rgba(255,255,255,0.4)');
+  grad.addColorStop(0.75, 'rgba(255,255,255,0.1)');
+  grad.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, size, size);
+  return new THREE.CanvasTexture(canvas);
+}
+const blobTex = createBlobTexture();
+
+// ─── LOAD CORPUS & BUILD SCENE ──────────────────────────
+let corpus = null;
+let pcaResult = null;
+let passagePositions = []; // THREE.Vector3 per passage
+let passageLabels = [];    // DOM elements
+let passageParticleStart = []; // index range per passage
+let particleData = [];
+let blobGeo, blobMat, blobPoints;
+let queryMarker = null;
+let passageAnchorIdx = [];   // index of deepest-colored particle per passage
+let labelScreenPos = [];     // smoothed {x, y} per label
+const PARTICLES_PER_PASSAGE = 18;
+const PASSAGE_SPREAD = 1.2;
+const SCALE = 15; // scale PCA coords to 3D space
+
+// Category color map
+const categoryColors = {};
+
+async function loadCorpus() {
+  const res = await fetch('corpus.json');
+  corpus = await res.json();
+
+  // Build color map
+  corpus.categories.forEach(c => {
+    categoryColors[c.id] = new THREE.Color(c.color);
+  });
+
+  // PCA
+  const embeddings = corpus.passages.map(p => p.embedding);
+  pcaResult = computePCA(embeddings, 3);
+
+  // Compute 3D positions
+  passagePositions = pcaResult.positions.map(coords =>
+    new THREE.Vector3(coords[0] * SCALE, coords[1] * SCALE, coords[2] * SCALE)
+  );
+
+  buildParticles();
+  buildDiagram();
+  buildLabels();
+}
+
+function buildParticles() {
+  const totalParticles = corpus.passages.length * PARTICLES_PER_PASSAGE;
+  const positions = new Float32Array(totalParticles * 3);
+  const colors = new Float32Array(totalParticles * 3);
+  const sizes = new Float32Array(totalParticles);
+
+  let idx = 0;
+  corpus.passages.forEach((passage, pIdx) => {
+    const center = passagePositions[pIdx];
+    const color = categoryColors[passage.category] || new THREE.Color(0x888888);
+    passageParticleStart.push(idx);
+
+    for (let i = 0; i < PARTICLES_PER_PASSAGE; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const r = PASSAGE_SPREAD * Math.pow(Math.random(), 0.5);
+
+      const x = center.x + r * Math.sin(phi) * Math.cos(theta);
+      const y = center.y + r * Math.sin(phi) * Math.sin(theta);
+      const z = center.z + r * Math.cos(phi);
+
+      positions[idx * 3] = x;
+      positions[idx * 3 + 1] = y;
+      positions[idx * 3 + 2] = z;
+
+      const c = color.clone();
+      const hsl = {};
+      c.getHSL(hsl);
+      c.setHSL(
+        hsl.h + (Math.random() - 0.5) * 0.04,
+        Math.min(1, hsl.s + (Math.random() - 0.5) * 0.15),
+        Math.min(1, Math.max(0, hsl.l + (Math.random() - 0.5) * 0.12))
+      );
+      colors[idx * 3] = c.r;
+      colors[idx * 3 + 1] = c.g;
+      colors[idx * 3 + 2] = c.b;
+
+      const distFromCenter = r / PASSAGE_SPREAD;
+      sizes[idx] = Math.max(1.2, 2.5 + Math.random() * 3.0 - distFromCenter * 1.5);
+
+      particleData.push({
+        index: idx,
+        passage: pIdx,
+        basePos: new THREE.Vector3(x, y, z),
+        targetPos: new THREE.Vector3(x, y, z),
+        homePos: new THREE.Vector3(x, y, z),
+        pos: new THREE.Vector3(x, y, z),
+        vel: new THREE.Vector3(
+          (Math.random() - 0.5) * 0.002,
+          (Math.random() - 0.5) * 0.002,
+          (Math.random() - 0.5) * 0.002
+        ),
+        scale: sizes[idx],
+        targetScale: sizes[idx],
+        baseScale: sizes[idx],
+        phase: Math.random() * Math.PI * 2,
+      });
+
+      idx++;
+    }
+  });
+
+  // Find deepest-colored (highest saturation) particle per passage
+  for (let pIdx = 0; pIdx < corpus.passages.length; pIdx++) {
+    const start = passageParticleStart[pIdx];
+    let bestIdx = start, bestSat = 0;
+    const tmp = new THREE.Color();
+    const hsl = {};
+    for (let j = 0; j < PARTICLES_PER_PASSAGE; j++) {
+      const ci = (start + j) * 3;
+      tmp.setRGB(colors[ci], colors[ci+1], colors[ci+2]);
+      tmp.getHSL(hsl);
+      if (hsl.s > bestSat) { bestSat = hsl.s; bestIdx = start + j; }
+    }
+    passageAnchorIdx.push(bestIdx);
+    labelScreenPos.push({ x: 0, y: 0 });
+  }
+
+  blobGeo = new THREE.BufferGeometry();
+  blobGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  blobGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  blobGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+  blobMat = new THREE.ShaderMaterial({
+    uniforms: {
+      map: { value: blobTex },
+      scale: { value: window.innerHeight * 0.5 },
+    },
+    vertexShader: `
+      attribute float size;
+      varying vec3 vColor;
+      uniform float scale;
+      void main() {
+        vColor = color;
+        vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = size * (scale / -mvPos.z);
+        gl_Position = projectionMatrix * mvPos;
+      }
+    `,
+    fragmentShader: `
+      uniform sampler2D map;
+      varying vec3 vColor;
+      void main() {
+        vec4 tex = texture2D(map, gl_PointCoord);
+        if (tex.a < 0.01) discard;
+        gl_FragColor = vec4(vColor * tex.rgb, tex.a);
+      }
+    `,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.NormalBlending,
+    vertexColors: true,
+  });
+
+  blobPoints = new THREE.Points(blobGeo, blobMat);
+  scene.add(blobPoints);
+}
+
+function buildLabels() {
+  corpus.passages.forEach((passage, i) => {
+    const el = document.createElement('div');
+    el.className = 'passage-label';
+    el.innerHTML = '';
+    el.dataset.idx = i;
+    document.body.appendChild(el);
+    passageLabels.push(el);
+  });
+}
+
+function buildDiagram() {
+  const diagramGroup = new THREE.Group();
+  scene.add(diagramGroup);
+
+  const diagramMat = new THREE.LineBasicMaterial({
+    color: 0x664433, transparent: true, opacity: 0.6, depthWrite: false,
+  });
+  const diagramMatFine = new THREE.LineBasicMaterial({
+    color: 0x664433, transparent: true, opacity: 0.4, depthWrite: false,
+  });
+
+  [6, 12, 20, 30].forEach((r, idx) => {
+    const pts = [];
+    for (let i = 0; i <= 80; i++) {
+      const a = (i / 80) * Math.PI * 2;
+      pts.push(new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r));
+    }
+    diagramGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), idx < 2 ? diagramMat : diagramMatFine));
+  });
+
+  [new THREE.Vector3(1,0,0), new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,1)].forEach(dir => {
+    const pts = [dir.clone().multiplyScalar(-40), dir.clone().multiplyScalar(40)];
+    diagramGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), diagramMat));
+  });
+
+  // Measurement rings
+  for (let i = 0; i < 3; i++) {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(8 + i * 5, 0.012, 6, 100),
+      new THREE.MeshBasicMaterial({ color: 0x664433, transparent: true, opacity: 0.5, depthWrite: false })
+    );
+    ring.rotation.x = Math.random() * Math.PI;
+    ring.rotation.y = Math.random() * Math.PI;
+    scene.add(ring);
+  }
+}
+
+// ─── QUERY HANDLING ─────────────────────────────────────
+// ─── TEXT SCRAMBLE ───────────────────────────────────────
+function scrambleText(el, target) {
+  if (el._scrambleTimer) clearInterval(el._scrambleTimer);
+  el._scrambleTarget = target;
+  let i = 0;
+  el.textContent = '';
+  el._scrambleTimer = setInterval(() => {
+    i++;
+    el.textContent = target.slice(0, i);
+    if (i >= target.length) clearInterval(el._scrambleTimer);
+  }, 22);
+}
+
+const queryInput = document.getElementById('query-input');
+const resultsPanel = document.getElementById('results-panel');
+let inputActive = false;
+let isQuerying = false;
+let currentHighlights = [];
+
+function autoResize() {
+  queryInput.style.height = 'auto';
+  queryInput.style.height = queryInput.scrollHeight + 'px';
+}
+queryInput.addEventListener('input', autoResize);
+
+queryInput.addEventListener('keydown', (e) => {
+  e.stopPropagation();
+  if (e.key === 'Enter' && !e.shiftKey && queryInput.value.trim()) {
+    e.preventDefault();
+    executeQuery(queryInput.value.trim());
+  }
+  if (e.key === 'Escape') {
+    queryInput.blur();
+    clearQuery();
+  }
+});
+queryInput.addEventListener('focus', () => { inputActive = true; });
+queryInput.addEventListener('blur', () => { inputActive = false; });
+
+async function executeQuery(text) {
+  if (isQuerying || !corpus) return;
+  isQuerying = true;
+  queryInput.classList.add('loading');
+  clearQuery();
+
+  try {
+    // Expand short queries for better semantic matching
+    const expandedText = text.split(/\s+/).length <= 4
+      ? `Shakespeare passages about: ${text}`
+      : text;
+    const embedding = await getEmbedding(expandedText);
+
+    // Compute similarities to all passages
+    const similarities = corpus.passages.map((p, i) => ({
+      sim: cosineSimilarity(embedding, p.embedding),
+      idx: i,
+    }));
+    similarities.sort((a, b) => b.sim - a.sim);
+
+    const topK = 3;
+    const maxSim = similarities[0].sim;
+    currentHighlights = similarities.slice(0, topK).map(s => s.idx);
+
+    // Project query into 3D
+    const queryCoords = projectPoint(embedding, pcaResult);
+    const queryPos = new THREE.Vector3(
+      queryCoords[0] * SCALE,
+      queryCoords[1] * SCALE,
+      queryCoords[2] * SCALE
+    );
+
+    // Place query marker as a globe of 5 rings
+    if (queryMarker) {
+      queryMarker.traverse(c => { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); });
+      scene.remove(queryMarker);
+    }
+    const GLOBE_R = 0.18;
+    const GLOBE_SEGS = 48;
+    const ringMat = new THREE.LineBasicMaterial({ color: 0x3c2d23 });
+    queryMarker = new THREE.Group();
+    const ringAngles = [
+      { x: 0, y: 0 },
+      { x: Math.PI / 2, y: 0 },
+      { x: 0, y: 0, z: Math.PI / 2 },
+      { x: Math.PI / 4, y: Math.PI / 4 },
+      { x: -Math.PI / 4, y: Math.PI / 4 },
+    ];
+    ringAngles.forEach(rot => {
+      const pts = [];
+      for (let i = 0; i <= GLOBE_SEGS; i++) {
+        const a = (i / GLOBE_SEGS) * Math.PI * 2;
+        pts.push(new THREE.Vector3(Math.cos(a) * GLOBE_R, Math.sin(a) * GLOBE_R, 0));
+      }
+      const ringLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), ringMat);
+      ringLine.rotation.x = rot.x || 0;
+      ringLine.rotation.y = rot.y || 0;
+      ringLine.rotation.z = rot.z || 0;
+      queryMarker.add(ringLine);
+    });
+    queryMarker.position.copy(queryPos);
+    queryMarker.scale.setScalar(0);
+    scene.add(queryMarker);
+
+    // Animate globe in
+    gsap.to(queryMarker.scale, {
+      x: 1, y: 1, z: 1, duration: 0.8, ease: 'elastic.out(1, 0.5)',
+    });
+
+    // Animate particles: expand top matches like selection, dim the rest
+    particleData.forEach(p => {
+      p.targetScale = currentHighlights.includes(p.passage) ? p.baseScale * 1.5 : p.baseScale * 0.35;
+    });
+
+    // Show source labels on matched clusters
+    const matchSet = new Set(currentHighlights);
+    passageLabels.forEach((el, i) => {
+      el.classList.remove('visible', 'highlight', 'dim');
+      if (matchSet.has(i)) {
+        el.innerHTML = corpus.passages[i].source;
+        el.classList.add('visible', 'highlight');
+      } else {
+        el.innerHTML = '';
+        el.classList.add('dim');
+      }
+    });
+
+    // Build results panel
+    resultsPanel.innerHTML = '';
+    similarities.slice(0, topK).forEach((s, idx) => {
+      const p = corpus.passages[s.idx];
+      const color = categoryColors[p.category];
+      const row = document.createElement('div');
+      row.className = 'result-row';
+      row.innerHTML = `
+        <span class="result-dot" style="background: #${color.getHexString()}"></span>
+        <span class="result-score">${s.sim.toFixed(3)}</span>
+        <div>
+          <div class="result-text">${p.text}</div>
+          <div class="result-source">${p.source}</div>
+        </div>
+      `;
+      row.addEventListener('click', () => {
+        animateCameraTo(passagePositions[s.idx]);
+      });
+      resultsPanel.appendChild(row);
+      setTimeout(() => row.classList.add('visible'), 80 + idx * 100);
+    });
+    resultsPanel.classList.add('visible');
+
+    // Camera drift toward query point
+    animateCameraTo(queryPos.clone().multiplyScalar(0.5));
+
+    bloomTarget = 0.2;
+    setTimeout(() => { bloomTarget = 0.1; }, 2000);
+
+  } catch (err) {
+    console.error('Query error:', err);
+    queryInput.style.borderColor = 'rgba(200,80,80,0.6)';
+    setTimeout(() => { queryInput.style.borderColor = ''; }, 1500);
+  }
+
+  isQuerying = false;
+  queryInput.classList.remove('loading');
+}
+
+function clearQuery() {
+  currentHighlights = [];
+  resultsPanel.classList.remove('visible');
+  resultsPanel.innerHTML = '';
+
+  if (queryMarker) {
+    queryMarker.traverse(c => { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); });
+    scene.remove(queryMarker); queryMarker = null;
+  }
+
+  // Restore all particles and clear selections
+  selectedPassages.clear();
+  particleData.forEach(p => { p.targetScale = p.baseScale; });
+  passageLabels.forEach(el => {
+    el.classList.remove('visible', 'highlight', 'dim');
+  });
+
+  animateCameraTo(new THREE.Vector3(0, 0, 0));
+}
+
+// ─── LIGHTING ───────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0xd4c8b8, 1.5));
+const pointLight = new THREE.PointLight(0xfff8f0, 1.5, 100);
+pointLight.position.set(0, 15, 0); scene.add(pointLight);
+const pointLight2 = new THREE.PointLight(0xf0e0c8, 1.0, 80);
+pointLight2.position.set(-15, -5, 10); scene.add(pointLight2);
+
+// Dust
+const dustGeo = new THREE.BufferGeometry();
+const dustPos = new Float32Array(200 * 3);
+for (let i = 0; i < 200; i++) {
+  const r = 30 + Math.random() * 120;
+  const theta = Math.random() * Math.PI * 2;
+  const phi = Math.acos(2 * Math.random() - 1);
+  dustPos[i*3] = r*Math.sin(phi)*Math.cos(theta);
+  dustPos[i*3+1] = r*Math.sin(phi)*Math.sin(theta);
+  dustPos[i*3+2] = r*Math.cos(phi);
+}
+dustGeo.setAttribute('position', new THREE.Float32BufferAttribute(dustPos, 3));
+scene.add(new THREE.Points(dustGeo, new THREE.PointsMaterial({
+  size: 0.12, color: 0xb8a898, transparent: true, opacity: 0.25, depthWrite: false, sizeAttenuation: true,
+})));
+
+// ─── CURSOR ─────────────────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const cursorRing = document.getElementById('cursorRing');
+const cursorDot = document.getElementById('cursorDot');
+const cursorWorld = new THREE.Vector3();
+const cursorPlane = new THREE.Plane(new THREE.Vector3(0,0,1), 0);
+const cursorRadius = 2.0;
+const cursorStrength = 1.5;
+
+let mouseMoved = false;
+window.addEventListener('mousemove', (e) => {
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  cursorRing.style.left = e.clientX + 'px';
+  cursorRing.style.top = e.clientY + 'px';
+  cursorDot.style.left = e.clientX + 'px';
+  cursorDot.style.top = e.clientY + 'px';
+  mouseMoved = true;
+});
+
+// Click → toggle-select passages (multi-select, isolates visually)
+const selectedPassages = new Set();
+
+function updateSelectionVisuals() {
+  const hasQuery = currentHighlights.length > 0;
+
+  if (selectedPassages.size === 0 && !hasQuery) {
+    // Nothing selected, no query: restore all
+    particleData.forEach(p => { p.targetScale = p.baseScale; });
+    passageLabels.forEach(el => el.classList.remove('visible', 'highlight', 'dim'));
+    return;
+  }
+
+  if (selectedPassages.size === 0 && hasQuery) {
+    // No selection but query active: restore query state
+    particleData.forEach(p => {
+      p.targetScale = currentHighlights.includes(p.passage) ? p.baseScale * 1.5 : p.baseScale * 0.35;
+    });
+    return;
+  }
+
+  // Selection active: brighten selected, dim the rest
+  particleData.forEach(p => {
+    p.targetScale = selectedPassages.has(p.passage) ? p.baseScale * 1.5 : p.baseScale * 0.35;
+  });
+
+  passageLabels.forEach((el, i) => {
+    el.classList.remove('visible', 'highlight', 'dim');
+    if (selectedPassages.has(i)) {
+      el.innerHTML = corpus.passages[i].source;
+      el.classList.add('visible', 'highlight');
+    } else {
+      el.innerHTML = '';
+      el.classList.add('dim');
+    }
+  });
+}
+
+let mouseDownPos = { x: 0, y: 0 };
+window.addEventListener('mousedown', (e) => { mouseDownPos.x = e.clientX; mouseDownPos.y = e.clientY; });
+window.addEventListener('click', (e) => {
+  if (!corpus || !passagePositions.length || inputActive) return;
+  const dx = e.clientX - mouseDownPos.x, dy = e.clientY - mouseDownPos.y;
+  if (dx * dx + dy * dy > 25) return; // dragged, not a click
+
+  raycaster.setFromCamera(mouse, camera);
+  let minDist = Infinity;
+  let nearest = -1;
+  passagePositions.forEach((pos, i) => {
+    const d = raycaster.ray.distanceToPoint(pos);
+    if (d < PASSAGE_SPREAD * 2.5 && d < minDist) {
+      minDist = d;
+      nearest = i;
+    }
+  });
+
+  if (nearest >= 0) {
+    // Toggle selection
+    if (selectedPassages.has(nearest)) {
+      selectedPassages.delete(nearest);
+    } else {
+      selectedPassages.add(nearest);
+    }
+    updateSelectionVisuals();
+  }
+});
+
+function animateCameraTo(target) {
+  const start = controls.target.clone();
+  const startTime = performance.now();
+  const duration = 2000;
+  function step(now) {
+    const t = Math.min((now - startTime) / duration, 1);
+    controls.target.lerpVectors(start, target, t * t * (3 - 2 * t));
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// ─── ANIMATION LOOP ─────────────────────────────────────
+const clock = new THREE.Clock();
+let bloomTarget = 0.1;
+const _camDir = new THREE.Vector3();
+const _projV = new THREE.Vector3();
+const FRAME_INTERVAL = 1 / 30; // cap at 30fps
+let frameAccum = 0;
+
+function animate() {
+  requestAnimationFrame(animate);
+  const rawDt = clock.getDelta();
+  frameAccum += rawDt;
+  if (frameAccum < FRAME_INTERVAL) return;
+  frameAccum -= FRAME_INTERVAL;
+  if (!blobGeo) { controls.update(); composer.render(); return; }
+
+  const elapsed = clock.getElapsedTime();
+
+  const posArr = blobGeo.attributes.position.array;
+  const sizeArr = blobGeo.attributes.size.array;
+  const cursorRadiusSq = cursorRadius * cursorRadius;
+
+  for (let i = 0; i < particleData.length; i++) {
+    const p = particleData[i];
+    p.scale += (p.targetScale - p.scale) * 0.06;
+    p.basePos.lerp(p.targetPos, 0.02 + Math.sin(p.phase) * 0.005);
+
+    const orbit = elapsed * 0.12 + p.phase;
+    p.pos.x = p.basePos.x + Math.sin(orbit) * 0.2 + p.vel.x * elapsed * 6;
+    p.pos.y = p.basePos.y + Math.sin(elapsed * 0.3 + p.phase) * 0.15 + Math.cos(orbit * 0.7) * 0.12;
+    p.pos.z = p.basePos.z + Math.cos(orbit) * 0.2 + p.vel.z * elapsed * 6;
+    p.pos.lerp(p.basePos, 0.001);
+
+    // Cursor force
+    const dx = p.pos.x - cursorWorld.x;
+    const dy = p.pos.y - cursorWorld.y;
+    const dz = p.pos.z - cursorWorld.z;
+    const distSq = dx*dx + dy*dy + dz*dz;
+    let cx = 0, cy = 0, cz = 0, scaleBoost = 1;
+    if (distSq < cursorRadiusSq && distSq > 0.01) {
+      const dist = Math.sqrt(distSq);
+      const falloff = 1 - dist / cursorRadius;
+      const str = falloff * falloff * cursorStrength;
+      cx = dx/dist * str; cy = dy/dist * str; cz = dz/dist * str;
+      scaleBoost = 1 + falloff * 0.4;
+    }
+
+    posArr[i*3] = p.pos.x + cx;
+    posArr[i*3+1] = p.pos.y + cy;
+    posArr[i*3+2] = p.pos.z + cz;
+    sizeArr[i] = p.scale * (1 + Math.sin(elapsed + p.phase) * 0.06) * scaleBoost;
+  }
+
+  blobGeo.attributes.position.needsUpdate = true;
+  blobGeo.attributes.size.needsUpdate = true;
+
+  // Slowly rotate query marker cluster
+  if (queryMarker) {
+    queryMarker.rotation.y = elapsed * 0.2;
+    queryMarker.rotation.x = elapsed * 0.1;
+  }
+
+  // Project cursor only when mouse moved
+  if (mouseMoved) {
+    raycaster.setFromCamera(mouse, camera);
+    camera.getWorldDirection(_camDir);
+    cursorPlane.normal.copy(_camDir);
+    cursorPlane.constant = -cursorPlane.normal.dot(controls.target);
+    raycaster.ray.intersectPlane(cursorPlane, cursorWorld);
+    mouseMoved = false;
+
+    // Hover detection: show label for nearest cluster under cursor
+    let hoverNearest = -1, hoverMinDist = Infinity;
+    passagePositions.forEach((pos, i) => {
+      const d = raycaster.ray.distanceToPoint(pos);
+      if (d < PASSAGE_SPREAD * 2.5 && d < hoverMinDist) {
+        hoverMinDist = d;
+        hoverNearest = i;
+      }
+    });
+
+    // Update hover label (don't override query/selection labels)
+    for (let i = 0; i < passageLabels.length; i++) {
+      const el = passageLabels[i];
+      const isQueryHighlight = currentHighlights.includes(i);
+      const isSelected = selectedPassages.has(i);
+      if (isQueryHighlight || isSelected) continue;
+
+      if (i === hoverNearest) {
+        const src = corpus.passages[i].source;
+        if (el._scrambleTarget !== src) {
+          el.classList.add('visible');
+          scrambleText(el, src);
+        }
+      } else {
+        if (el.classList.contains('visible')) {
+          el.classList.remove('visible');
+          el.textContent = '';
+          el._scrambleTarget = '';
+          if (el._scrambleTimer) { clearInterval(el._scrambleTimer); el._scrambleTimer = null; }
+        }
+      }
+    }
+  }
+
+  // Project labels from fixed passage positions
+  {
+    const w = window.innerWidth, h = window.innerHeight;
+    for (let i = 0; i < passageLabels.length; i++) {
+      const el = passageLabels[i];
+      if (!el.classList.contains('visible') && !el.classList.contains('highlight')) continue;
+      _projV.copy(passagePositions[i]).project(camera);
+      if (_projV.z > 1) { el.style.visibility = 'hidden'; continue; }
+      el.style.visibility = '';
+      el.style.left = ((_projV.x * 0.5 + 0.5) * w) + 'px';
+      el.style.top = ((-_projV.y * 0.5 + 0.5) * h - 20) + 'px';
+    }
+  }
+
+  bloom.strength += (bloomTarget - bloom.strength) * 0.03;
+  controls.update();
+  composer.render();
+}
+
+// ─── RESIZE ─────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  composer.setSize(window.innerWidth, window.innerHeight);
+  if (blobMat) blobMat.uniforms.scale.value = window.innerHeight * 0.5;
+  composer.render(); // render immediately to prevent blank frame
+});
+
+// ─── INIT ───────────────────────────────────────────────
+setTimeout(() => {
+  document.getElementById('overlay').classList.add('fade');
+  setTimeout(() => document.getElementById('overlay').remove(), 2500);
+}, 300);
+document.body.style.cursor = 'none';
+
+// API key check
+if (!COHERE_KEY) {
+  const prompt = document.createElement('div');
+  prompt.id = 'api-prompt';
+  prompt.innerHTML = `<div class="hint">COHERE API KEY</div><input type="password" placeholder="paste key..." autocomplete="off">`;
+  document.body.appendChild(prompt);
+  const keyInput = prompt.querySelector('input');
+  keyInput.focus();
+  keyInput.addEventListener('keydown', (e) => {
+    e.stopPropagation();
+    if (e.key === 'Enter' && keyInput.value.trim()) {
+      COHERE_KEY = keyInput.value.trim();
+      localStorage.setItem('cohere_key', COHERE_KEY);
+      prompt.remove();
+      queryInput.focus();
+    }
+  });
+}
+
+// Load corpus and start
+loadCorpus().then(() => {
+  console.log(`Loaded ${corpus.passages.length} passages across ${corpus.categories.length} categories`);
+}).catch(err => console.error('Failed to load corpus:', err));
+
+animate();
+</script>
+</body>
+</html>
