@@ -8,7 +8,6 @@ semantic search embeddings visualizer for shakespeare's complete works (or anyth
 
 type anything into the search field — modern slang, a feeling, a question — and the engine finds the closest shakespeare passages by meaning, not keywords.
 
-<img width="700" alt="Screenshot 2026-03-18 at 6 49 11 PM" src="https://github.com/user-attachments/assets/fe5af5fe-34e1-4280-a52f-2b5a3fee016e" />
 
 
 ## how it works
