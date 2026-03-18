@@ -1,4 +1,4 @@
-# iambic
+# quarto
 
 a 3d semantic search visualizer for shakespeare's complete works.
 
