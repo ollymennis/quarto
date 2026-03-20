@@ -1,8 +1,8 @@
 # shakesphere
 
-semantic search embeddings visualizer for shakespeare's complete works (or anything, really)
+semantic search embeddings visualizer
 
-plays and sonnets are embedded using cohere's embed-v4.0 model, projected into 3d space via pca, and rendered as interactive particle clusters. passages that share meaning cluster together — love near love, madness near madness — regardless of the words used.
+shakespeare plays and sonnets are embedded using cohere's embed-v4.0 model and rendered as interactive particle clusters.
 
 type anything into the search field — modern slang, a feeling, a question — and the engine finds the closest shakespeare passages by meaning.
 
