@@ -9,8 +9,6 @@ type anything into the search field — modern slang, a feeling, a question — 
 
 https://github.com/user-attachments/assets/4b997116-cce8-4969-bf55-59dae285277b
 
-wait i should have called it _shakesphere_
-
 ## how it works
 
 - each passage is a cluster of soft particles, color-coded by theme
