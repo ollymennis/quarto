@@ -17,16 +17,6 @@ https://github.com/user-attachments/assets/4b997116-cce8-4969-bf55-59dae285277b
 - query expansion wraps short queries with context for better matching
 - a wireframe globe marks where your query lands in the space
 
-## categories
-
-- **love & desire** — romeo and juliet, sonnets, the tempest
-- **tragedy & death** — hamlet, macbeth, king lear
-- **ambition & power** — julius caesar, henry v, richard iii
-- **wisdom & reflection** — as you like it, measure for measure
-- **comedy & wit** — twelfth night, much ado, midsummer
-- **madness & despair** — othello, macbeth, hamlet
-- **magic & wonder** — the tempest, midsummer, the winter's tale
-
 ## setup
 
 ```
